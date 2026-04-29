@@ -2,26 +2,23 @@ import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-from .database import init_db, close_db
+from .database import engine
 from .routers import parcels, farmers, contracts
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await init_db()
     yield
-    await close_db()
+    await engine.dispose()
 
 
 app = FastAPI(
     title="Water Fill Map API",
     description="API для визуализации заполнения лимитов воды по участкам",
-    version="1.0.0",
+    version="2.0.0",
     lifespan=lifespan,
 )
 
-# Разрешённые origins берём из переменной окружения
 _raw = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:5173")
 ALLOWED_ORIGINS = [o.strip() for o in _raw.split(",") if o.strip()]
 
