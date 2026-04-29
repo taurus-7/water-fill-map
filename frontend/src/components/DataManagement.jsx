@@ -345,24 +345,25 @@ function ContractsPanel() {
     try {
       let res
       if (editingContract) {
-        // Update contract (PUT)
-        res = await fetch(`${API}/api/contracts/${editingContract.id}`, {
+        // БАГ 4 FIX: PUT /full сохраняет договор + участки вместе
+        res = await fetch(`${API}/api/contracts/${editingContract.id}/full`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            farmer_id: editingContract.farmer_id,
             contract_number: form.contract_number,
             contract_date: form.contract_date || null,
             total_water_volume: form.total_water_volume,
             actual_water_volume: form.actual_water_volume,
             tariff_amount: form.tariff_amount,
             year: form.year,
+            parcels,
           }),
         })
         if (!res.ok) {
           const err = await res.json()
           throw new Error(err.detail || 'Ошибка обновления')
         }
-        // For parcels, we'd need to update individually; skip for now
       } else {
         // Create contract (POST)
         res = await fetch(`${API}/api/contracts`, {
